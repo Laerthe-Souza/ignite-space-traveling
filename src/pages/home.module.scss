@@ -1,1 +1,82 @@
-// TODO
+.header {
+  padding: 3rem 0;
+}
+
+.content {
+  margin-bottom: 3rem;
+
+  a {
+    display: block;
+
+    & + a {
+      margin-top: 3rem;
+    }
+
+    strong {
+      font-weight: 700;
+      color: var(--gray-100);
+      font-size: 1.8rem;
+      line-height: 2rem;
+      transition: color 0.2s;
+    }
+
+    &:hover strong {
+      color: var(--pink-500);
+    }
+
+    p {
+      color: var(--gray-200);
+      font-size: 1.2rem;
+      line-height: 1.8rem;
+      margin: 0.8rem 0 1rem;
+    }
+
+    time {
+      color: var(--gray-300);
+      display: inline-flex;
+      align-items: center;
+      margin-right: 2rem;
+
+      svg {
+        margin-right: 0.5rem;
+      }
+    }
+
+    span {
+      color: var(--gray-300);
+      display: inline-flex;
+      align-items: center;
+
+      svg {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+
+  button {
+    position: relative;
+    margin: 3rem 0 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--pink-500);
+    border: 0;
+    background-color: transparent;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -30%;
+      height: 2px;
+      width: 0%;
+      background-color: var(--pink-500);
+      transition: width 0.2s;
+    }
+
+    &:hover {
+      &::after {
+        width: 100%;
+      }
+    }
+  }
+}
