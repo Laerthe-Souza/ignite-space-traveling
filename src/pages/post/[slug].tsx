@@ -8,6 +8,8 @@ import Prismic from '@prismicio/client';
 
 import { RichText } from 'prismic-dom';
 import { useRouter } from 'next/router';
+import { useEffect, useRef } from 'react';
+import Link from 'next/link';
 import Header from '../../components/Header';
 import { getPrismicClient } from '../../services/prismic';
 
@@ -16,6 +18,7 @@ import styles from './post.module.scss';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -31,21 +34,50 @@ interface Post {
   };
 }
 
+type PostList = {
+  uid?: string;
+  title: string;
+};
+
 interface PostProps {
   post: Post;
+  postList: PostList[];
+  currentPostIndex: number;
 }
 
-export default function Post({ post }: PostProps): JSX.Element {
+export default function Post({
+  post,
+  postList,
+  currentPostIndex,
+}: PostProps): JSX.Element {
+  const commentsRef = useRef<HTMLDivElement>(null);
+
   const router = useRouter();
 
-  if (router.isFallback) {
+  useEffect(() => {
+    const script = document.createElement('script');
+
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('crossorigin', 'anonymous');
+    script.setAttribute('async', 'true');
+    script.setAttribute('repo', process.env.NEXT_PUBLIC_GITHUB_REPO);
+    script.setAttribute('issue-term', 'blog');
+    script.setAttribute('theme', 'github-dark');
+
+    commentsRef.current.appendChild(script);
+  }, []);
+
+  /*   if (router.isFallback) {
     return (
       <div className={styles.loadingContainer}>
         <div />
         <h1>Carregando...</h1>
       </div>
     );
-  }
+  } */
+
+  const hasNextPost = currentPostIndex + 1 < postList.length;
+  const hasPreviousPost = currentPostIndex > 0;
 
   const words = post.data.content.reduce(
     (acc, content) => {
@@ -90,6 +122,17 @@ export default function Post({ post }: PostProps): JSX.Element {
             <MdAccessTime size={24} /> {Math.ceil(words.length / 200)} min
           </span>
 
+          <p className={styles.updatedAtInfo}>
+            * editado em
+            {format(
+              new Date(post.last_publication_date),
+              " dd MMM yyyy 'às' HH:mm",
+              {
+                locale: ptBR,
+              }
+            )}
+          </p>
+
           {post.data.content.map(content => (
             <div key={content.heading} className={styles.postContainer}>
               <strong>{content.heading}</strong>
@@ -103,6 +146,36 @@ export default function Post({ post }: PostProps): JSX.Element {
             </div>
           ))}
         </main>
+
+        <footer className={`${styles.footer} ${commonStyles.container}`}>
+          <div>
+            {hasPreviousPost && (
+              <Link href={`/post/${postList[currentPostIndex - 1].uid}`}>
+                <a>
+                  {postList[currentPostIndex - 1].title}
+                  <br /> <strong>Post anterior</strong>
+                </a>
+              </Link>
+            )}
+
+            {hasNextPost ? (
+              <Link href={`/post/${postList[currentPostIndex + 1].uid}`}>
+                <a>
+                  {postList[currentPostIndex + 1].title}
+                  <br /> <strong>Proximo post</strong>
+                </a>
+              </Link>
+            ) : (
+              <Link href="/">
+                <a>
+                  <strong>Voltar para página inicial</strong>
+                </a>
+              </Link>
+            )}
+          </div>
+
+          <div ref={commentsRef} />
+        </footer>
       </div>
     </>
   );
@@ -129,7 +202,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return {
     paths: posts,
-    fallback: true,
+    fallback: 'blocking',
   };
 };
 
@@ -137,10 +210,39 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { slug } = params;
 
   const prismic = getPrismicClient();
+
   const response = await prismic.getByUID('post', String(slug), {});
+
+  const postsResponse = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'post')],
+    {
+      fetch: [
+        'post.title',
+        'post.subtitle',
+        'post.author',
+        'post.last_publication_date',
+      ],
+    }
+  );
+
+  let currentPostIndex: number;
+
+  postsResponse.results.forEach((post, index) => {
+    if (Object.is(post.uid, response.uid)) {
+      currentPostIndex = index;
+    }
+  });
+
+  const postList = postsResponse.results.map(post => {
+    return {
+      uid: post.uid,
+      title: post.data.title,
+    };
+  });
 
   const post = {
     first_publication_date: response.first_publication_date,
+    last_publication_date: response.last_publication_date,
     data: {
       title: response.data.title,
       subtitle: response.data.subtitle,
@@ -159,6 +261,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   return {
     props: {
       post,
+      postList,
+      currentPostIndex,
     },
   };
 };

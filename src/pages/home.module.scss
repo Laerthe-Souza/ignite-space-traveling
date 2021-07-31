@@ -1,5 +1,9 @@
 .header {
   padding: 3rem 0;
+
+  &.preview {
+    padding-top: calc(3rem + 5rem);
+  }
 }
 
 .content {
@@ -78,5 +82,24 @@
         width: 100%;
       }
     }
+  }
+}
+
+.previewButton {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5rem;
+  background-color: var(--pink-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  a {
+    background-color: #fff;
+    padding: 0.5rem 0.8rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
   }
 }

@@ -42,6 +42,8 @@
 
 .content {
   margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid var(--gray-300);
 
   h1 {
     margin: 2rem 0 0.8rem;
@@ -70,6 +72,35 @@
 
     & svg {
       margin-right: 0.5rem;
+    }
+  }
+}
+
+.footer {
+  div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+
+    a {
+      font-size: 1.5rem;
+      color: var(--gray-300);
+      max-width: 330px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+
+      strong {
+        position: relative;
+        margin-top: 0.5rem;
+        display: inline-block;
+        color: var(--pink-500);
+      }
+
+      &:last-child {
+        text-align: right;
+      }
     }
   }
 }
@@ -104,4 +135,10 @@
       margin: 0.5rem 0;
     }
   }
+}
+
+.updatedAtInfo {
+  margin-top: 0.5rem;
+  font-style: italic;
+  color: var(--gray-300);
 }
